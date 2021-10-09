@@ -1,6 +1,6 @@
 package pokemon
 
-type pokemon struct {
+type Pokemon struct {
 	Name   string
 	Weight float32
 	Height float32
@@ -8,9 +8,9 @@ type pokemon struct {
 	Types  []string
 }
 
-func (pokemon) getTestPokemon() pokemon {
+func (Pokemon) GetTestPokemon() Pokemon {
 
-	testPokemon := pokemon{
+	testPokemon := Pokemon{
 		Name:   "testPokemon",
 		Weight: 1.000,
 		Height: 1.000,
