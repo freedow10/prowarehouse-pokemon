@@ -73,13 +73,11 @@ func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// db := database.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10))
-
 	db := newHandler(app.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10)))
 
 	dbResults, count, err := db.Database.GetAListOfPokemonFromDB(pageLimiter, pagenr)
 	if err != nil {
-		fmt.Println(err)
+		w.Write([]byte(string(err.Error())))
 		return
 	}
 
@@ -104,6 +102,19 @@ func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
 
 	jsonPokemon, _ := json.Marshal(results)
 	w.Write(jsonPokemon)
+}
+
+func ResetTable(w http.ResponseWriter, r *http.Request) {
+	db := newHandler(app.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10)))
+
+	errorOnEmpty := db.Database.EmptyTableData()
+
+	if errorOnEmpty != "Table emptied" {
+		w.Write([]byte(string(errorOnEmpty)))
+		return
+	}
+
+	w.Write([]byte(db.Database.FillPokemonTable(500)))
 }
 
 func convertPokemonModelToViewModel(input model.Pokemon) pokemonViewModel {
@@ -134,14 +145,10 @@ func convertPokemonModelToViewModel(input model.Pokemon) pokemonViewModel {
 }
 
 func main() {
-	// db := database.InitDatabase("./db/pokemon.db")
-
-	// fmt.Println(db.EmptyTableData())
-
-	// fmt.Println(db.FillDatabase(500))
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", GetAListOfPokemon).Methods("GET")
+	router.HandleFunc("/resetdb", ResetTable).Methods("POST")
 
 	fmt.Println("Server started on port 8080")
 	err := http.ListenAndServe(":8080", router)
