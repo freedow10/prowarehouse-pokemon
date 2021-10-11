@@ -1,22 +1,39 @@
 package pokemon
 
-type Pokemon struct {
-	Name   string
-	Weight float32
-	Height float32
-	Moves  []string
-	Types  []string
-}
+import (
+	"strings"
 
-func (Pokemon) GetTestPokemon() Pokemon {
+	"github.com/mtslzr/pokeapi-go"
+	"github.com/mtslzr/pokeapi-go/structs"
+)
 
-	testPokemon := Pokemon{
-		Name:   "testPokemon",
-		Weight: 1.000,
-		Height: 1.000,
-		Moves:  []string{"Move1", "Move2", "Move3"},
-		Types:  []string{"Type1", "Type2", "Type3"},
+func GetAPokemon(input string) (*structs.Pokemon, error) {
+	l, err := pokeapi.Pokemon(input)
+	if err != nil {
+		return nil, err
 	}
 
-	return testPokemon
+	return &l, nil
+}
+
+func FetchAListPokemon(lenghth int) ([]*structs.Pokemon, error) {
+	var pokemonList = []*structs.Pokemon{}
+
+	r, err := pokeapi.Resource("pokemon", 0, lenghth)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, e := range r.Results {
+		s := strings.Split(e.URL, "/")
+
+		p, err := GetAPokemon(s[len(s)-2])
+		if err != nil {
+			return nil, err
+		}
+
+		pokemonList = append(pokemonList, p)
+	}
+
+	return pokemonList, nil
 }
