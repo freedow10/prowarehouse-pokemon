@@ -29,12 +29,12 @@ type pokemonViewModel struct {
 	Types  []string `json:"types"`
 }
 
-type Handler struct {
+type DBHandler struct {
 	Database app.DatebaseInterface
 }
 
-func newHandler(db app.Database) *Handler {
-	return &Handler{
+func newDBHandler(db app.Database) *DBHandler {
+	return &DBHandler{
 		Database: db,
 	}
 }
@@ -73,7 +73,7 @@ func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	db := newHandler(app.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10)))
+	db := newDBHandler(app.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10)))
 
 	dbResults, count, err := db.Database.GetAListOfPokemonFromDB(pageLimiter, pagenr)
 	if err != nil {
@@ -105,7 +105,7 @@ func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
 }
 
 func ResetTable(w http.ResponseWriter, r *http.Request) {
-	db := newHandler(app.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10)))
+	db := newDBHandler(app.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10)))
 
 	errorOnEmpty := db.Database.EmptyTableData()
 
