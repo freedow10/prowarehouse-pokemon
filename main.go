@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	model "github.com/freedow10/prowarehouse-pokemon/Model"
 	"github.com/freedow10/prowarehouse-pokemon/database"
@@ -23,7 +24,7 @@ func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
 	db := database.InitDatabase("./db/pokemon.db")
 	w.Header().Set("Content-Type", "application/json")
 
-	l, err := db.GetAListOfPokemonFromDB(20)
+	l, err := db.GetAListOfPokemonFromDB(500)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -34,8 +35,8 @@ func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
 		pokemonList = append(pokemonList, convertPokemonModelToViewModel(elements))
 	}
 
-	dat, _ := json.Marshal(pokemonList)
-	w.Write(dat)
+	jsonPokemon, _ := json.Marshal(pokemonList)
+	w.Write(jsonPokemon)
 }
 
 func convertPokemonModelToViewModel(input model.Pokemon) pokemonViewModel {
@@ -57,23 +58,29 @@ func convertPokemonModelToViewModel(input model.Pokemon) pokemonViewModel {
 	}
 
 	return pokemonViewModel{
-		Name:   input.Name,
-		Weight: float32(input.Weight),
-		Height: float32(input.Height),
+		Name:   strings.Title(input.Name),
+		Weight: input.Weight,
+		Height: input.Height,
 		Moves:  tmpMoveSlice,
 		Types:  tmpTypeSlice,
 	}
 }
 
 func main() {
+	// db := database.InitDatabase("./db/pokemon.db")
 
 	// fmt.Println(db.EmptyTableData())
 
-	// fmt.Println(db.FillDatabase(100))
+	// fmt.Println(db.FillDatabase(500))
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", GetAListOfPokemon).Methods("GET")
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	fmt.Println("Server started on port 8080")
+	err := http.ListenAndServe(":8080", router)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Server started on port 8080")
 
 }
