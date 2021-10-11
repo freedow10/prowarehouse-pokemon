@@ -9,3 +9,6 @@ To make use of pagination, you only need to add the following query params in th
 The `page` param is for the page you want to see and the `limit` param is number of record you want to see in the list.
 The default for both parameter are `Page 1` and `Limit 10`.
 
+Example:
+
+![image](https://user-images.githubusercontent.com/8654109/136849860-39e90fa4-8ce7-401e-8b2b-5ee11c860249.png)
