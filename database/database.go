@@ -19,13 +19,27 @@ func InitDatabase(db string) Database {
 	return Database{dbLocation: db}
 }
 
-func (d Database) GetAListOfPokemonFromDB(limiter int) ([]model.Pokemon, error) {
+func (d Database) GetAListOfPokemonFromDB(ULimiter int, UPageNr int) ([]model.Pokemon, int, error) {
 	sqliteDatabase, _ := sql.Open("sqlite3", d.dbLocation)
 
-	rows, err := sqliteDatabase.Query(`select * from pokemon limit ?`, limiter)
+	var totalRecords int
+
+	errorOnCount := sqliteDatabase.QueryRow("SELECT COUNT(*) FROM pokemon").Scan(&totalRecords)
+	if errorOnCount != nil {
+		sqliteDatabase.Close()
+		return nil, 0, errorOnCount
+	}
+
+	pagenr := (UPageNr * ULimiter) - ULimiter
+
+	if pagenr < 0 {
+		pagenr = 0
+	}
+
+	rows, err := sqliteDatabase.Query(`select * from pokemon limit ? offset ?`, ULimiter, pagenr)
 	if err != nil {
 		sqliteDatabase.Close()
-		return nil, err
+		return nil, 0, err
 	}
 
 	var pokemon model.Pokemon
@@ -44,7 +58,7 @@ func (d Database) GetAListOfPokemonFromDB(limiter int) ([]model.Pokemon, error) 
 	}
 
 	sqliteDatabase.Close()
-	return pokemonList, nil
+	return pokemonList, totalRecords, nil
 }
 
 func (d Database) EmptyTableData() string {
