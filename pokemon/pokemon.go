@@ -7,7 +7,16 @@ import (
 	"github.com/mtslzr/pokeapi-go/structs"
 )
 
-func GetAPokemon(input string) (*structs.Pokemon, error) {
+type Pokemon struct {
+	defaultLimiter int
+}
+
+func InitPokemon(defaultLimiter int) *Pokemon {
+	return &Pokemon{defaultLimiter: defaultLimiter}
+
+}
+
+func (p *Pokemon) GetAPokemon(input string) (*structs.Pokemon, error) {
 	l, err := pokeapi.Pokemon(input)
 	if err != nil {
 		return nil, err
@@ -16,7 +25,7 @@ func GetAPokemon(input string) (*structs.Pokemon, error) {
 	return &l, nil
 }
 
-func FetchAListPokemon(lenghth int) ([]*structs.Pokemon, error) {
+func (p *Pokemon) FetchAListPokemon(lenghth int) ([]*structs.Pokemon, error) {
 	var pokemonList = []*structs.Pokemon{}
 
 	r, err := pokeapi.Resource("pokemon", 0, lenghth)
@@ -27,7 +36,7 @@ func FetchAListPokemon(lenghth int) ([]*structs.Pokemon, error) {
 	for _, e := range r.Results {
 		s := strings.Split(e.URL, "/")
 
-		p, err := GetAPokemon(s[len(s)-2])
+		p, err := p.GetAPokemon(s[len(s)-2])
 		if err != nil {
 			return nil, err
 		}

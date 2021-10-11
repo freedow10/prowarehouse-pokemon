@@ -1,22 +1,33 @@
-package database
+package app
 
 import (
 	"database/sql"
 	"strings"
 
 	model "github.com/freedow10/prowarehouse-pokemon/Model"
-	"github.com/freedow10/prowarehouse-pokemon/pokemon"
 	"github.com/mtslzr/pokeapi-go/structs"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Database struct {
-	dbLocation string
+type Pokemoner interface {
+	GetAPokemon(input string) (*structs.Pokemon, error)
+	FetchAListPokemon(lenghth int) ([]*structs.Pokemon, error)
 }
 
-func InitDatabase(db string) Database {
-	return Database{dbLocation: db}
+type DatebaseInterface interface {
+	GetAListOfPokemonFromDB(ULimiter int, UPageNr int) ([]model.Pokemon, int, error)
+	EmptyTableData() string
+	FillPokemonTable(amount int) string
+}
+
+type Database struct {
+	dbLocation string
+	pokemoner  Pokemoner
+}
+
+func InitDatabase(db string, pokemoner Pokemoner) Database {
+	return Database{dbLocation: db, pokemoner: pokemoner}
 }
 
 func (d Database) GetAListOfPokemonFromDB(ULimiter int, UPageNr int) ([]model.Pokemon, int, error) {
@@ -70,7 +81,6 @@ func (d Database) EmptyTableData() string {
 	if err != nil {
 		sqliteDatabase.Close()
 		return err.Error()
-
 	}
 
 	_, err = statement.Exec()
@@ -82,17 +92,15 @@ func (d Database) EmptyTableData() string {
 	return "Table emptied"
 }
 
-func (d Database) FillDatabase(amount int) string {
+func (d Database) FillPokemonTable(amount int) string {
 
-	result, err := pokemon.FetchAListPokemon(amount)
+	result, err := d.pokemoner.FetchAListPokemon(amount)
 	if err != nil {
-
 		return err.Error()
 	}
 
 	modelPokemon := []model.Pokemon{}
 	for _, elements := range result {
-
 		modelPokemon = append(modelPokemon, convertStructPokemonToPokemonModel(elements))
 	}
 

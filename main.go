@@ -10,7 +10,8 @@ import (
 	"strings"
 
 	model "github.com/freedow10/prowarehouse-pokemon/Model"
-	"github.com/freedow10/prowarehouse-pokemon/database"
+	"github.com/freedow10/prowarehouse-pokemon/app"
+	"github.com/freedow10/prowarehouse-pokemon/pokemon"
 	"github.com/gorilla/mux"
 )
 
@@ -26,6 +27,16 @@ type pokemonViewModel struct {
 	Height float32  `json:"height"`
 	Moves  []string `json:"moves"`
 	Types  []string `json:"types"`
+}
+
+type Handler struct {
+	Database app.DatebaseInterface
+}
+
+func newHandler(db app.Database) *Handler {
+	return &Handler{
+		Database: db,
+	}
 }
 
 func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
@@ -62,9 +73,11 @@ func GetAListOfPokemon(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	db := database.InitDatabase("./db/pokemon.db")
+	// db := database.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10))
 
-	dbResults, count, err := db.GetAListOfPokemonFromDB(pageLimiter, pagenr)
+	db := newHandler(app.InitDatabase("./db/pokemon.db", pokemon.InitPokemon(10)))
+
+	dbResults, count, err := db.Database.GetAListOfPokemonFromDB(pageLimiter, pagenr)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -135,6 +148,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Server started on port 8080")
 
 }
