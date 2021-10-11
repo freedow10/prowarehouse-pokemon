@@ -104,7 +104,10 @@ func (d Database) FillPokemonTable(amount int) string {
 		modelPokemon = append(modelPokemon, convertStructPokemonToPokemonModel(elements))
 	}
 
-	sqliteDatabase, _ := sql.Open("sqlite3", d.dbLocation)
+	sqliteDatabase, errorOnDB := sql.Open("sqlite3", d.dbLocation)
+	if errorOnDB != nil {
+		return errorOnDB.Error()
+	}
 
 	insertPokemonSQL := `INSERT INTO pokemon(Name, Weight, Height,Moves,Types) VALUES (?, ?, ?, ?, ?)`
 
